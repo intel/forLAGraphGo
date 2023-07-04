@@ -29,7 +29,7 @@ func intersectionSize(x, y []int) (n int) {
 	return
 }
 
-// This is a slow version. It's purpose is to have a simple algorithm
+// LCCCheck is a slow version. It's purpose is to have a simple algorithm
 // whose result can be used to verify the results of more optimized versions.
 func (G *Graph[D]) LCCCheck() (coefficients GrB.Vector[float64], err error) {
 	defer GrB.CheckErrors(&err)

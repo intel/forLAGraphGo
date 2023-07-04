@@ -10,7 +10,7 @@ import (
 	"testing"
 )
 
-func checkCC[D GrB.Number](t *testing.T, Component GrB.Vector[int], G *LAGraph.Graph[D]) (err error) {
+func checkCC[D GrB.Number](Component GrB.Vector[int], G *LAGraph.Graph[D]) (err error) {
 	defer GrB.CheckErrors(&err)
 
 	GrB.OK(G.Check())
@@ -149,7 +149,7 @@ func runTestCCMatrices[D GrB.Number](A GrB.Matrix[D], ncomp int, t *testing.T) {
 			t.Fail()
 		}
 
-		try(checkCC(t, C, G))
+		try(checkCC(C, G))
 
 		G.Kind = LAGraph.AdjacencyDirected
 		G.IsSymmetricStructure = LAGraph.True
