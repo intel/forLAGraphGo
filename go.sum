@@ -1,0 +1,4 @@
+github.com/intel/forGoParallel v0.0.0-20230627133628-2d8f5d072c35 h1:tURVe6YD/045rpP98IDPaFTgFFTwjzm8mCsyDFJikm8=
+github.com/intel/forGoParallel v0.0.0-20230627133628-2d8f5d072c35/go.mod h1:zVf6o5G3S4Y7dF1Nee1bZE3KMm4Q+TD9WWBH+elLMUM=
+github.com/intel/forGraphBLASGo v0.0.0-20230714120612-15b6936419f2 h1:vdAtBti1yvQSpuNUWP2bu8DP17izdhZZItv+miXbyjk=
+github.com/intel/forGraphBLASGo v0.0.0-20230714120612-15b6936419f2/go.mod h1:cZF5HPGal9qMEZuvz9D3jfQcsYZj2a02wmLffMK6XRo=
