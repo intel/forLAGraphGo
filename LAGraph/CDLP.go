@@ -87,9 +87,9 @@ func (G *Graph[D]) CDLP(itermax int) (result GrB.Vector[int], err error) {
 
 	for iteration := 0; iteration < itermax; iteration++ {
 		parallel.Range(0, n, n, func(low, high int) {
-			var counts map[int]int
+			counts := make(map[int]int)
 			for i := low; i < high; i++ {
-				counts = make(map[int]int) // todo: use clear
+				clear(counts)
 				neighbors := Sis[Sps[i]:Sps[i+1]]
 				for _, neighbor := range neighbors {
 					counts[L[neighbor]]++

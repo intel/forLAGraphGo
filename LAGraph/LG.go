@@ -7,7 +7,7 @@ func nselfEdges[D GrB.Predefined](A GrB.Matrix[D]) (nselfEdges int, err error) {
 	nselfEdges = Unknown
 	nrows, ncols, err := A.Size()
 	GrB.OK(err)
-	n := Min(nrows, ncols)
+	n := min(nrows, ncols)
 	d, err := GrB.VectorNew[D](n)
 	GrB.OK(err)
 	defer func() {

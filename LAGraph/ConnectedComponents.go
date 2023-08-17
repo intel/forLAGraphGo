@@ -73,7 +73,7 @@ func connectedComponents[D GrB.Predefined, Int int32 | int64, Uint uint32 | uint
 		GrB.OK(f())
 	}
 	ramp := GrB.RowIndex[Int, Int]()
-	min := GrB.Min[Uint]()
+	umin := GrB.Min[Uint]()
 	imin := GrB.Min[Int]()
 	eq := GrB.Eq[Uint]()
 	min2nd := GrB.MinSecondSemiring[Uint]()
@@ -83,8 +83,8 @@ func connectedComponents[D GrB.Predefined, Int int32 | int64, Uint uint32 | uint
 	sampling := nvals > n*fastsvSamples*2 && n > 1024
 
 	nthreads := runtime.GOMAXPROCS(0)
-	nthreads = Min(nthreads, n/16)
-	nthreads = Max(nthreads, 1)
+	nthreads = min(nthreads, n/16)
+	nthreads = max(nthreads, 1)
 
 	c, err := GrB.MatrixNew[bool](n, n)
 	GrB.OK(err)
@@ -170,7 +170,7 @@ func connectedComponents[D GrB.Predefined, Int int32 | int64, Uint uint32 | uint
 				defer wg.Done()
 				for i := ranges[tid]; i < ranges[tid+1]; i++ {
 					deg := aps[i+1] - aps[i]
-					counts[tid+1] += Min(fastsvSamples, deg)
+					counts[tid+1] += min(fastsvSamples, deg)
 				}
 			}(tid)
 		}
@@ -207,7 +207,7 @@ func connectedComponents[D GrB.Predefined, Int int32 | int64, Uint uint32 | uint
 
 		GrB.OK(T.PackCSR(&tp, &tj, &tx, true, ajumbled, nil))
 
-		fastsv[Uint](T, parent, mngp, &gp, &gpNew, t, eq, min, min2nd, c, &cp, &px)
+		fastsv[Uint](T, parent, mngp, &gp, &gpNew, t, eq, umin, min2nd, c, &cp, &px)
 
 		const hashSamples = 864
 		htCount := make(map[int]int32)
@@ -285,7 +285,7 @@ func connectedComponents[D GrB.Predefined, Int int32 | int64, Uint uint32 | uint
 		return GrB.VectorView[int, Uint](parent)
 	}
 
-	fastsv[Uint](GrB.MatrixView[bool, D](A), parent, mngp, &gp, &gpNew, t, eq, min, min2nd, c, &cp, &px)
+	fastsv[Uint](GrB.MatrixView[bool, D](A), parent, mngp, &gp, &gpNew, t, eq, umin, min2nd, c, &cp, &px)
 
 	return GrB.VectorView[int, Uint](parent)
 }

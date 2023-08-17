@@ -15,20 +15,6 @@ const (
 	VersionMinor = 0
 )
 
-func Min[T GrB.Number](x, y T) T {
-	if x < y {
-		return x
-	}
-	return y
-}
-
-func Max[T GrB.Number](x, y T) T {
-	if x > y {
-		return x
-	}
-	return y
-}
-
 const Unknown = -1
 
 type Kind int
@@ -740,7 +726,7 @@ func (G *Graph[D]) SortByDegree(byOut, ascending bool) (permutationVector []int,
 
 func (G *Graph[D]) SampleDegree(byOut bool, nSamples int, rnd *rand.Rand) (sampleMean, sampleMedian float64, err error) {
 	defer GrB.CheckErrors(&err)
-	nSamples = Max(nSamples, 1)
+	nSamples = max(nSamples, 1)
 
 	GrB.OK(G.Check())
 	var Degree GrB.Vector[int]
