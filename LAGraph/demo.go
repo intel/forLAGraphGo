@@ -299,7 +299,7 @@ func ReadProblem[D GrB.Number](computeSourceNodes, makeSymmetric, removeSelfEdge
 		GrB.OK(e)
 		defer try(A2.Free)
 
-		GrB.OK(A2.AssignConstant(RA.AsMask(), nil, true, GrB.All(n), GrB.All(n), GrB.DescS))
+		GrB.OK(GrB.MatrixAssignConstant(A2, RA.AsMask(), nil, true, GrB.All(n), GrB.All(n), GrB.DescS))
 		GrB.OK(RA.Free())
 		GrB.OK(A2.Wait(GrB.Materialize))
 		A = GrB.MatrixView[D, bool](A2)
@@ -317,7 +317,7 @@ func ReadProblem[D GrB.Number](computeSourceNodes, makeSymmetric, removeSelfEdge
 		} else {
 			A, err = GrB.MatrixNew[D](n, n)
 			GrB.OK(err)
-			GrB.OK(A.Apply(nil, nil, GrB.Identity[D](), GrB.MatrixView[D, int64](RA), nil))
+			GrB.OK(GrB.MatrixApply(A, nil, nil, GrB.Identity[D](), GrB.MatrixView[D, int64](RA), nil))
 			GrB.OK(A.Wait(GrB.Materialize))
 			GrB.OK(RA.Free())
 		}
@@ -342,8 +342,8 @@ func ReadProblem[D GrB.Number](computeSourceNodes, makeSymmetric, removeSelfEdge
 	}
 
 	if !structural && ensurePositive {
-		GrB.OK(G.A.Select(nil, nil, GrB.Valuene[D](), G.A, 0, nil))
-		GrB.OK(G.A.Apply(nil, nil, GrB.Abs[D](), G.A, nil))
+		GrB.OK(GrB.MatrixSelect(G.A, nil, nil, GrB.Valuene[D](), G.A, 0, nil))
+		GrB.OK(GrB.MatrixApply(G.A, nil, nil, GrB.Abs[D](), G.A, nil))
 	}
 
 	if !AIsSymmetric {
@@ -364,11 +364,11 @@ func ReadProblem[D GrB.Number](computeSourceNodes, makeSymmetric, removeSelfEdge
 			GrB.OK(e)
 			sym := oknvals == nvals
 			if sym {
-				sym, e = OK.Reduce(GrB.LandMonoidBool, nil)
+				sym, e = GrB.MatrixReduce(GrB.LandMonoidBool, OK, nil)
 				GrB.OK(e)
 			}
 			if !sym {
-				GrB.OK(G.A.EWiseAddBinaryOp(nil, nil, GrB.Plus[D](), G.A, G.AT, nil))
+				GrB.OK(GrB.MatrixEWiseAddBinaryOp(G.A, nil, nil, GrB.Plus[D](), G.A, G.AT, nil))
 			}
 			G.Kind = AdjacencyUndirected
 			G.IsSymmetricStructure = True

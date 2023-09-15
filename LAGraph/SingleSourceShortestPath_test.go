@@ -242,15 +242,15 @@ func TestSingleSourceShortestPath(t *testing.T) {
 		} else if typ != GrB.Int32 {
 			T, err := GrB.MatrixNew[int32](n, n)
 			try(err)
-			try(T.Assign(nil, nil, A, GrB.All(n), GrB.All(n), nil))
+			try(GrB.MatrixAssign(T, nil, nil, A, GrB.All(n), GrB.All(n), nil))
 			try(A.Free())
 			A = T
 		}
-		try(A.ApplyBinaryOp2nd(nil, nil, GrB.Band[int32](), A, 255, nil))
-		x, err := A.Reduce(GrB.MinMonoid[int32](), nil)
+		try(GrB.MatrixApplyBinaryOp2nd(A, nil, nil, GrB.Band[int32](), A, 255, nil))
+		x, err := GrB.MatrixReduce(GrB.MinMonoid[int32](), A, nil)
 		try(err)
 		if x < 1 {
-			try(A.ApplyBinaryOp2nd(nil, nil, GrB.Max[int32](), A, 1, nil))
+			try(GrB.MatrixApplyBinaryOp2nd(A, nil, nil, GrB.Max[int32](), A, 1, nil))
 		}
 
 		G := LAGraph.New(A, LAGraph.AdjacencyDirected)
@@ -293,7 +293,7 @@ func prepareSSSPTypes[To LAGraph.SingleSourceShortestPathDomains, From GrB.Numbe
 	var from From
 	switch any(from).(type) {
 	case int, int32, int64, float32, float64:
-		GrB.OK(A.Apply(nil, nil, GrB.Abs[From](), A, nil))
+		GrB.OK(GrB.MatrixApply(A, nil, nil, GrB.Abs[From](), A, nil))
 	}
 	mx := uint64(255)
 	if fmx := uint64(GrB.Maximum[From]()); fmx < mx {
@@ -301,21 +301,21 @@ func prepareSSSPTypes[To LAGraph.SingleSourceShortestPathDomains, From GrB.Numbe
 	}
 	switch any(from).(type) {
 	case int, int32, int64, uint, uint32, uint64:
-		GrB.OK(A.ApplyBinaryOp2nd(nil, nil, GrB.Max[From](), A, 1, nil))
-		GrB.OK(A.ApplyBinaryOp2nd(nil, nil, GrB.Min[From](), A, From(mx), nil))
+		GrB.OK(GrB.MatrixApplyBinaryOp2nd(A, nil, nil, GrB.Max[From](), A, 1, nil))
+		GrB.OK(GrB.MatrixApplyBinaryOp2nd(A, nil, nil, GrB.Min[From](), A, From(mx), nil))
 	case float32, float64:
-		emax, e := A.Reduce(GrB.MaxMonoid[From](), nil)
+		emax, e := GrB.MatrixReduce(GrB.MaxMonoid[From](), A, nil)
 		GrB.OK(e)
 		emax = From(float64(mx) / float64(emax))
-		GrB.OK(A.ApplyBinaryOp2nd(nil, nil, GrB.Times[From](), A, emax, nil))
-		GrB.OK(A.ApplyBinaryOp2nd(nil, nil, GrB.Max[From](), A, 1, nil))
+		GrB.OK(GrB.MatrixApplyBinaryOp2nd(A, nil, nil, GrB.Times[From](), A, emax, nil))
+		GrB.OK(GrB.MatrixApplyBinaryOp2nd(A, nil, nil, GrB.Max[From](), A, 1, nil))
 	default:
 		T, err = GrB.MatrixNew[To](n, n)
 		GrB.OK(err)
 		Tf := GrB.MatrixView[float64, To](T)
 		Af := GrB.MatrixView[float64, From](A)
-		GrB.OK(Tf.Apply(nil, nil, GrB.Abs[float64](), Af, nil))
-		GrB.OK(Tf.ApplyBinaryOp2nd(nil, nil, GrB.Max[float64](), Tf, 0.1, nil))
+		GrB.OK(GrB.MatrixApply(Tf, nil, nil, GrB.Abs[float64](), Af, nil))
+		GrB.OK(GrB.MatrixApplyBinaryOp2nd(Tf, nil, nil, GrB.Max[float64](), Tf, 0.1, nil))
 		GrB.OK(A.Free())
 		return T, nil
 	}

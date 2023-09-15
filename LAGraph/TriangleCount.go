@@ -180,14 +180,14 @@ func (G *Graph[D]) TriangleCountMethods(inMethod TriangleCountMethod, inPresort 
 		T, e := GrB.MatrixNew[bool](n, n)
 		GrB.OK(e)
 		defer try(T.Free)
-		GrB.OK(T.Extract(nil, nil, GrB.MatrixView[bool, D](A), P, P, nil))
+		GrB.OK(GrB.MatrixExtract(T, nil, nil, GrB.MatrixView[bool, D](A), P, P, nil))
 		A = GrB.MatrixView[D, bool](T)
 	}
 
 	switch method {
 	case TriangleCountBurkhardt:
-		GrB.OK(C.MxM(A.AsMask(), nil, semiring, GrB.MatrixView[int, D](A), GrB.MatrixView[int, D](A), GrB.DescS))
-		ntriangles, err = C.Reduce(monoid, nil)
+		GrB.OK(GrB.MxM(C, A.AsMask(), nil, semiring, GrB.MatrixView[int, D](A), GrB.MatrixView[int, D](A), GrB.DescS))
+		ntriangles, err = GrB.MatrixReduce(monoid, C, nil)
 		GrB.OK(err)
 		ntriangles /= 6
 	case TriangleCountCohen:
@@ -195,36 +195,36 @@ func (G *Graph[D]) TriangleCountMethods(inMethod TriangleCountMethod, inPresort 
 		GrB.OK(e)
 		defer try(L.Free)
 		defer try(U.Free)
-		GrB.OK(C.MxM(A.AsMask(), nil, semiring, GrB.MatrixView[int, bool](L), GrB.MatrixView[int, bool](U), GrB.DescS))
-		ntriangles, err = C.Reduce(monoid, nil)
+		GrB.OK(GrB.MxM(C, A.AsMask(), nil, semiring, GrB.MatrixView[int, bool](L), GrB.MatrixView[int, bool](U), GrB.DescS))
+		ntriangles, err = GrB.MatrixReduce(monoid, C, nil)
 		GrB.OK(err)
 		ntriangles /= 2
 	case TriangleCountSandiaLL:
 		L, _, e := tricountPrep(GrB.MatrixView[bool, D](A), true, false)
 		GrB.OK(e)
 		defer try(L.Free)
-		GrB.OK(C.MxM(L.AsMask(), nil, semiring, GrB.MatrixView[int, bool](L), GrB.MatrixView[int, bool](L), GrB.DescS))
-		ntriangles, err = C.Reduce(monoid, nil)
+		GrB.OK(GrB.MxM(C, L.AsMask(), nil, semiring, GrB.MatrixView[int, bool](L), GrB.MatrixView[int, bool](L), GrB.DescS))
+		ntriangles, err = GrB.MatrixReduce(monoid, C, nil)
 	case TriangleCountSandiaUU:
 		_, U, e := tricountPrep(GrB.MatrixView[bool, D](A), false, true)
 		GrB.OK(e)
 		defer try(U.Free)
-		GrB.OK(C.MxM(U.AsMask(), nil, semiring, GrB.MatrixView[int, bool](U), GrB.MatrixView[int, bool](U), GrB.DescS))
-		ntriangles, err = C.Reduce(monoid, nil)
+		GrB.OK(GrB.MxM(C, U.AsMask(), nil, semiring, GrB.MatrixView[int, bool](U), GrB.MatrixView[int, bool](U), GrB.DescS))
+		ntriangles, err = GrB.MatrixReduce(monoid, C, nil)
 	case TriangleCountSandiaLUT:
 		L, U, e := tricountPrep(GrB.MatrixView[bool, D](A), true, true)
 		GrB.OK(e)
 		defer try(L.Free)
 		defer try(U.Free)
-		GrB.OK(C.MxM(L.AsMask(), nil, semiring, GrB.MatrixView[int, bool](L), GrB.MatrixView[int, bool](U), GrB.DescST1))
-		ntriangles, err = C.Reduce(monoid, nil)
+		GrB.OK(GrB.MxM(C, L.AsMask(), nil, semiring, GrB.MatrixView[int, bool](L), GrB.MatrixView[int, bool](U), GrB.DescST1))
+		ntriangles, err = GrB.MatrixReduce(monoid, C, nil)
 	case TriangleCountSandiaULT:
 		L, U, e := tricountPrep(GrB.MatrixView[bool, D](A), true, true)
 		GrB.OK(e)
 		defer try(L.Free)
 		defer try(U.Free)
-		GrB.OK(C.MxM(U.AsMask(), nil, semiring, GrB.MatrixView[int, bool](U), GrB.MatrixView[int, bool](L), GrB.DescST1))
-		ntriangles, err = C.Reduce(monoid, nil)
+		GrB.OK(GrB.MxM(C, U.AsMask(), nil, semiring, GrB.MatrixView[int, bool](U), GrB.MatrixView[int, bool](L), GrB.DescST1))
+		ntriangles, err = GrB.MatrixReduce(monoid, C, nil)
 	default:
 		panic("unreachable code")
 	}

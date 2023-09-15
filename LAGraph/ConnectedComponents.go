@@ -47,19 +47,19 @@ func fastsv[Uint uint32 | uint64](
 	iso := true
 	jumbled := false
 	for {
-		GrB.OK(mngp.MxV(nil, &min, min2nd, GrB.MatrixView[Uint, bool](A), *gp, nil))
+		GrB.OK(GrB.MxV(mngp, nil, &min, min2nd, GrB.MatrixView[Uint, bool](A), *gp, nil))
 		GrB.OK(C.PackCSC(cp, px, &cx, iso, jumbled, nil))
-		GrB.OK(parent.MxV(nil, &min, min2nd, GrB.MatrixView[Uint, bool](C), mngp, nil))
+		GrB.OK(GrB.MxV(parent, nil, &min, min2nd, GrB.MatrixView[Uint, bool](C), mngp, nil))
 		var err error
 		*cp, *px, cx, iso, jumbled, err = C.UnpackCSC(true, nil)
 		GrB.OK(err)
 
-		GrB.OK(parent.EWiseAddBinaryOp(nil, &min, min, mngp, *gp, nil))
+		GrB.OK(GrB.VectorEWiseAddBinaryOp(parent, nil, &min, min, mngp, *gp, nil))
 		pxs := (*px).UnsafeSlice()[:0]
 		GrB.OK(GrB.VectorView[int, Uint](parent).ExtractTuples(nil, &pxs))
-		GrB.OK(gpNew.Extract(nil, nil, parent, pxs, nil))
+		GrB.OK(GrB.VectorExtract(*gpNew, nil, nil, parent, pxs, nil))
 		GrB.OK(GrB.VectorEWiseMultBinaryOp(t, nil, nil, eq, *gpNew, *gp, nil))
-		done, err := t.Reduce(GrB.LandMonoidBool, nil)
+		done, err := GrB.VectorReduce(GrB.LandMonoidBool, t, nil)
 		GrB.OK(err)
 		if done {
 			break
@@ -96,8 +96,8 @@ func connectedComponents[D GrB.Predefined, Int int32 | int64, Uint uint32 | uint
 		GrB.OK(e)
 		defer try(t.Free)
 
-		GrB.OK(t.AssignConstant(nil, nil, 0, GrB.All(n+1), nil))
-		GrB.OK(t.ApplyIndexOp(nil, nil, GrB.RowIndex[int, int](), t, 0, nil))
+		GrB.OK(GrB.VectorAssignConstant(t, nil, nil, 0, GrB.All(n+1), nil))
+		GrB.OK(GrB.VectorApplyIndexOp(t, nil, nil, GrB.RowIndex[int, int](), t, 0, nil))
 		cp, _, err = t.UnpackFull(nil)
 		GrB.OK(err)
 		GrB.OK(t.Free())
@@ -109,22 +109,22 @@ func connectedComponents[D GrB.Predefined, Int int32 | int64, Uint uint32 | uint
 		GrB.OK(e)
 		defer try(t.Free)
 
-		GrB.OK(t.AssignConstant(nil, nil, 0, GrB.All(n), nil))
+		GrB.OK(GrB.VectorAssignConstant(t, nil, nil, 0, GrB.All(n), nil))
 
 		y, err = GrB.VectorNew[Int](n)
 		GrB.OK(err)
 		defer try(y.Free)
 
-		GrB.OK(y.AssignConstant(nil, nil, 0, GrB.All(n), nil))
-		GrB.OK(y.ApplyIndexOp(nil, nil, ramp, y, 0, nil))
-		GrB.OK(y.MxV(nil, &imin, min2ndi, GrB.MatrixView[Int, D](A), t, nil))
+		GrB.OK(GrB.VectorAssignConstant(y, nil, nil, 0, GrB.All(n), nil))
+		GrB.OK(GrB.VectorApplyIndexOp(y, nil, nil, ramp, y, 0, nil))
+		GrB.OK(GrB.MxV(y, nil, &imin, min2ndi, GrB.MatrixView[Int, D](A), t, nil))
 
 		GrB.OK(t.Free())
 	}
 
 	parent, err := GrB.VectorNew[Uint](n)
 	GrB.OK(err)
-	GrB.OK(parent.Assign(nil, nil, GrB.VectorView[Uint, Int](y), GrB.All(n), nil))
+	GrB.OK(GrB.VectorAssign(parent, nil, nil, GrB.VectorView[Uint, Int](y), GrB.All(n), nil))
 	GrB.OK(y.Free())
 
 	px := GrB.MakeSystemSlice[int](n)

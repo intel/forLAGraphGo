@@ -45,30 +45,30 @@ func (G *Graph[D]) PageRankGAP(damping, tolerance float32, iterMax int) (central
 	w, err := GrB.VectorNew[float32](n)
 	GrB.OK(err)
 	defer try(w.Free)
-	GrB.OK(r.AssignConstant(nil, nil, 1/float32(n), GrB.All(n), nil))
+	GrB.OK(GrB.VectorAssignConstant(r, nil, nil, 1/float32(n), GrB.All(n), nil))
 
 	d, err := GrB.VectorNew[float32](n)
 	GrB.OK(err)
 	defer try(d.Free)
-	GrB.OK(d.ApplyBinaryOp2nd(nil, nil, GrB.Div[float32](), GrB.VectorView[float32, int](dOut), damping, nil))
+	GrB.OK(GrB.VectorApplyBinaryOp2nd(d, nil, nil, GrB.Div[float32](), GrB.VectorView[float32, int](dOut), damping, nil))
 	dmin := 1 / damping
 	d1, err := GrB.VectorNew[float32](n)
 	GrB.OK(err)
 	defer try(d1.Free)
-	GrB.OK(d1.AssignConstant(nil, nil, dmin, GrB.All(n), nil))
-	GrB.OK(d.EWiseAddBinaryOp(nil, nil, GrB.Max[float32](), d1, d, nil))
+	GrB.OK(GrB.VectorAssignConstant(d1, nil, nil, dmin, GrB.All(n), nil))
+	GrB.OK(GrB.VectorEWiseAddBinaryOp(d, nil, nil, GrB.Max[float32](), d1, d, nil))
 	GrB.OK(d1.Free())
 
 	for iterations = 0; iterations < iterMax && rdiff > tolerance; iterations++ {
 		t, r = r, t
-		GrB.OK(w.EWiseMultBinaryOp(nil, nil, GrB.Div[float32](), t, d, nil))
-		GrB.OK(r.AssignConstant(nil, nil, teleport, GrB.All(n), nil))
+		GrB.OK(GrB.VectorEWiseMultBinaryOp(w, nil, nil, GrB.Div[float32](), t, d, nil))
+		GrB.OK(GrB.VectorAssignConstant(r, nil, nil, teleport, GrB.All(n), nil))
 		plus := GrB.Plus[float32]()
-		GrB.OK(r.MxV(nil, &plus, PlusSecond[float32](), GrB.MatrixView[float32, D](AT), w, nil))
+		GrB.OK(GrB.MxV(r, nil, &plus, PlusSecond[float32](), GrB.MatrixView[float32, D](AT), w, nil))
 		minus := GrB.Minus[float32]()
-		GrB.OK(t.Assign(nil, &minus, r, GrB.All(n), nil))
-		GrB.OK(t.Apply(nil, nil, GrB.Abs[float32](), t, nil))
-		rdiff, err = t.Reduce(GrB.PlusMonoid[float32](), nil)
+		GrB.OK(GrB.VectorAssign(t, nil, &minus, r, GrB.All(n), nil))
+		GrB.OK(GrB.VectorApply(t, nil, nil, GrB.Abs[float32](), t, nil))
+		rdiff, err = GrB.VectorReduce(GrB.PlusMonoid[float32](), t, nil)
 		GrB.OK(err)
 	}
 

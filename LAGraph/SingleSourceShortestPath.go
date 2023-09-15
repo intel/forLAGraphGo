@@ -62,7 +62,7 @@ func SingleSourceShortestPath[D SingleSourceShortestPathDomains](G *Graph[D], so
 	gt := GrB.Valuegt[D]()
 	lessThan := GrB.Lt[D]()
 	minPlus := GrB.MinPlusSemiring[D]()
-	GrB.OK(t.AssignConstant(nil, nil, GrB.Maximum[D](), GrB.All(n), nil))
+	GrB.OK(GrB.VectorAssignConstant(t, nil, nil, GrB.Maximum[D](), GrB.All(n), nil))
 	negativeEdgeWeights := true
 	var x D
 	switch any(x).(type) {
@@ -85,25 +85,25 @@ func SingleSourceShortestPath[D SingleSourceShortestPathDomains](G *Graph[D], so
 	AL, err := GrB.MatrixNew[D](n, n)
 	GrB.OK(err)
 	defer try(AL.Free)
-	GrB.OK(AL.Select(nil, nil, le, A, delta, nil))
+	GrB.OK(GrB.MatrixSelect(AL, nil, nil, le, A, delta, nil))
 	GrB.OK(AL.Wait(GrB.Materialize))
 
 	AH, err := GrB.MatrixNew[D](n, n)
 	GrB.OK(err)
 	defer try(AH.Free)
-	GrB.OK(AH.Select(nil, nil, gt, A, delta, nil))
+	GrB.OK(GrB.MatrixSelect(AH, nil, nil, gt, A, delta, nil))
 	GrB.OK(AH.Wait(GrB.Materialize))
 
 	for step := 0; ; step++ {
 		uBound := D(step+1) * delta
 		GrB.OK(tmasked.Clear())
-		GrB.OK(tmasked.Assign(&reach, nil, t, GrB.All(n), nil))
-		GrB.OK(tmasked.Select(nil, nil, lt, tmasked, uBound, nil))
+		GrB.OK(GrB.VectorAssign(tmasked, &reach, nil, t, GrB.All(n), nil))
+		GrB.OK(GrB.VectorSelect(tmasked, nil, nil, lt, tmasked, uBound, nil))
 		tmaskedNvals, e := tmasked.Nvals()
 		GrB.OK(e)
 		for tmaskedNvals > 0 {
-			GrB.OK(tReq.VxM(nil, nil, minPlus, tmasked, AL, nil))
-			GrB.OK(s.AssignConstant(tmasked.AsMask(), nil, true, GrB.All(n), GrB.DescS))
+			GrB.OK(GrB.VxM(tReq, nil, nil, minPlus, tmasked, AL, nil))
+			GrB.OK(GrB.VectorAssignConstant(s, tmasked.AsMask(), nil, true, GrB.All(n), GrB.DescS))
 
 			tReqNvals, e := tReq.Nvals()
 			GrB.OK(e)
@@ -113,37 +113,37 @@ func SingleSourceShortestPath[D SingleSourceShortestPathDomains](G *Graph[D], so
 
 			GrB.OK(GrB.VectorEWiseMultBinaryOp(tless, nil, nil, lessThan, tReq, t, nil))
 
-			GrB.OK(tless.Select(nil, nil, ne, tless, false, nil))
+			GrB.OK(GrB.VectorSelect(tless, nil, nil, ne, tless, false, nil))
 			tLessNvals, e := tless.Nvals()
 			GrB.OK(e)
 			if tLessNvals == 0 {
 				break
 			}
 
-			GrB.OK(reach.AssignConstant(&tless, nil, true, GrB.All(n), GrB.DescS))
+			GrB.OK(GrB.VectorAssignConstant(reach, &tless, nil, true, GrB.All(n), GrB.DescS))
 
 			GrB.OK(tmasked.Clear())
-			GrB.OK(tmasked.Select(&tless, nil, lt, tReq, uBound, GrB.DescS))
+			GrB.OK(GrB.VectorSelect(tmasked, &tless, nil, lt, tReq, uBound, GrB.DescS))
 
 			if negativeEdgeWeights {
-				GrB.OK(tmasked.Select(nil, nil, ge, tmasked, D(step)*delta, nil))
+				GrB.OK(GrB.VectorSelect(tmasked, nil, nil, ge, tmasked, D(step)*delta, nil))
 			}
 
-			GrB.OK(t.Assign(&tless, nil, tReq, GrB.All(n), GrB.DescS))
+			GrB.OK(GrB.VectorAssign(t, &tless, nil, tReq, GrB.All(n), GrB.DescS))
 			tmaskedNvals, err = tmasked.Nvals()
 			GrB.OK(err)
 		}
 
 		GrB.OK(tmasked.Clear())
-		GrB.OK(tmasked.Assign(&s, nil, t, GrB.All(n), GrB.DescS))
+		GrB.OK(GrB.VectorAssign(tmasked, &s, nil, t, GrB.All(n), GrB.DescS))
 
-		GrB.OK(tReq.VxM(nil, nil, minPlus, tmasked, AH, nil))
+		GrB.OK(GrB.VxM(tReq, nil, nil, minPlus, tmasked, AH, nil))
 		GrB.OK(GrB.VectorEWiseMultBinaryOp(tless, nil, nil, lessThan, tReq, t, nil))
-		GrB.OK(t.Assign(&tless, nil, tReq, GrB.All(n), nil))
+		GrB.OK(GrB.VectorAssign(t, &tless, nil, tReq, GrB.All(n), nil))
 
-		GrB.OK(reach.AssignConstant(&tless, nil, true, GrB.All(n), nil))
+		GrB.OK(GrB.VectorAssignConstant(reach, &tless, nil, true, GrB.All(n), nil))
 
-		GrB.OK(reach.Assign(&s, nil, Empty, GrB.All(n), GrB.DescS))
+		GrB.OK(GrB.VectorAssign(reach, &s, nil, Empty, GrB.All(n), GrB.DescS))
 		nreach, e := reach.Nvals()
 		GrB.OK(e)
 		if nreach == 0 {

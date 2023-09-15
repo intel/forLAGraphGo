@@ -28,7 +28,7 @@ func (G *Graph[D]) CDLPCheck(itermax int) (result GrB.Vector[int], err error) {
 
 	S, err := GrB.MatrixNew[int](n, n)
 	GrB.OK(err)
-	GrB.OK(S.ApplyBinaryOp2nd(nil, nil, GrB.Oneb[int](), GrB.MatrixView[int, D](A), 0, nil))
+	GrB.OK(GrB.MatrixApplyBinaryOp2nd(S, nil, nil, GrB.Oneb[int](), GrB.MatrixView[int, D](A), 0, nil))
 
 	LP := GrB.MakeSystemSlice[int](n + 1)
 	{
@@ -68,17 +68,17 @@ func (G *Graph[D]) CDLPCheck(itermax int) (result GrB.Vector[int], err error) {
 		GrB.OK(err)
 		defer try(AT.Free)
 
-		GrB.OK(AT.Transpose(nil, nil, S, nil))
+		GrB.OK(GrB.Transpose(AT, nil, nil, S, nil))
 	}
 
 	var I, X []int
 	for iteration := 0; iteration < itermax; iteration++ {
-		GrB.OK(S.MxM(nil, nil, GrB.MinSecondSemiring[int](), S, L, nil))
+		GrB.OK(GrB.MxM(S, nil, nil, GrB.MinSecondSemiring[int](), S, L, nil))
 		I = I[:0]
 		X = X[:0]
 		GrB.OK(S.ExtractTuples(&I, nil, &X))
 		if !symmetric {
-			GrB.OK(AT.MxM(nil, nil, GrB.MinSecondSemiring[int](), AT, L, nil))
+			GrB.OK(GrB.MxM(AT, nil, nil, GrB.MinSecondSemiring[int](), AT, L, nil))
 			GrB.OK(S.ExtractTuples(&I, nil, &X))
 		}
 

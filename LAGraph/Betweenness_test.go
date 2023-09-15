@@ -33,9 +33,9 @@ func bcDifference(t *testing.T, bc GrB.Vector[float64], gapResult []float64) flo
 	delta, err := GrB.VectorNew[float32](n)
 	try(err)
 	defer tryf(delta.Free)
-	try(delta.EWiseAddBinaryOp(nil, nil, GrB.Minus[float32](), gapBc, GrB.VectorView[float32, float64](bc), nil))
-	try(delta.Apply(nil, nil, GrB.Abs[float32](), delta, nil))
-	diff, err := delta.Reduce(GrB.MaxMonoid[float32](), nil)
+	try(GrB.VectorEWiseAddBinaryOp(delta, nil, nil, GrB.Minus[float32](), gapBc, GrB.VectorView[float32, float64](bc), nil))
+	try(GrB.VectorApply(delta, nil, nil, GrB.Abs[float32](), delta, nil))
+	diff, err := GrB.VectorReduce(GrB.MaxMonoid[float32](), delta, nil)
 	try(err)
 	return diff
 }

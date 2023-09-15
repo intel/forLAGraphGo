@@ -47,7 +47,7 @@ func (G *Graph[D]) LocalClusteringCoefficient() (coefficients GrB.Vector[float64
 	GrB.OK(err)
 	defer try(S.Free)
 
-	GrB.OK(S.ApplyBinaryOp2nd(nil, nil, GrB.Oneb[float64](), GrB.MatrixView[float64, D](A), 0, nil))
+	GrB.OK(GrB.MatrixApplyBinaryOp2nd(S, nil, nil, GrB.Oneb[float64](), GrB.MatrixView[float64, D](A), 0, nil))
 	if G.NSelfEdges != 0 {
 		GrB.OK(GrB.MatrixSelect(S, nil, nil, GrB.Offdiag[float64](), S, 0, nil))
 	}
@@ -66,7 +66,7 @@ func (G *Graph[D]) LocalClusteringCoefficient() (coefficients GrB.Vector[float64
 	defer try(U.Free)
 
 	if G.IsSymmetricStructure == False {
-		GrB.OK(S.EWiseAddBinaryOp(nil, nil, GrB.Plus[float64](), S, S, GrB.DescT1))
+		GrB.OK(GrB.MatrixEWiseAddBinaryOp(S, nil, nil, GrB.Plus[float64](), S, S, GrB.DescT1))
 	}
 	GrB.OK(GrB.MatrixSelect(U, nil, nil, GrB.Triu[float64](), S, 0, nil))
 
@@ -77,17 +77,17 @@ func (G *Graph[D]) LocalClusteringCoefficient() (coefficients GrB.Vector[float64
 	x, err := GrB.VectorNew[float64](n)
 	GrB.OK(err)
 	defer try(x.Free)
-	GrB.OK(x.AssignConstant(nil, nil, 0, GrB.All(n), nil))
+	GrB.OK(GrB.VectorAssignConstant(x, nil, nil, 0, GrB.All(n), nil))
 	GrB.OK(GrB.MxV(W, nil, nil, PlusOne[float64](), S, x, nil))
 	GrB.OK(x.Free())
 
-	GrB.OK(W.Apply(nil, nil, comb, W, nil))
+	GrB.OK(GrB.VectorApply(W, nil, nil, comb, W, nil))
 
 	CL, err := GrB.MatrixNew[float64](n, n)
 	GrB.OK(err)
 	defer try(CL.Free)
 
-	GrB.OK(CL.MxM(S.AsMask(), nil, GrB.PlusSecond[float64](), S, U, GrB.DescST1))
+	GrB.OK(GrB.MxM(CL, S.AsMask(), nil, GrB.PlusSecond[float64](), S, U, GrB.DescST1))
 	GrB.OK(S.Free())
 	GrB.OK(U.Free())
 
@@ -98,10 +98,10 @@ func (G *Graph[D]) LocalClusteringCoefficient() (coefficients GrB.Vector[float64
 			_ = LCC.Free()
 		}
 	}()
-	GrB.OK(LCC.MatrixReduceBinaryOp(nil, nil, GrB.Plus[float64](), CL, nil))
+	GrB.OK(GrB.MatrixReduceBinaryOp(LCC, nil, nil, GrB.Plus[float64](), CL, nil))
 	GrB.OK(CL.Free())
 
-	GrB.OK(LCC.EWiseMultBinaryOp(nil, nil, GrB.Div[float64](), LCC, W, nil))
+	GrB.OK(GrB.VectorEWiseMultBinaryOp(LCC, nil, nil, GrB.Div[float64](), LCC, W, nil))
 
 	coefficients = LCC
 	return

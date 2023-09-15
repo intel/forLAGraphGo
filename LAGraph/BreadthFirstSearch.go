@@ -122,8 +122,8 @@ func breadthFirstSearch[D GrB.Predefined, Int int32 | int64, Q int32 | int64 | b
 				} else if anyPull {
 					switchToPull = growing && nq > nOverBeta1
 				} else {
-					GrB.OK(w.Assign(q.AsMask(), nil, Degree, GrB.All(n), GrB.DescRS))
-					edgesInFrontier, e := w.Reduce(GrB.PlusMonoid[int](), nil)
+					GrB.OK(GrB.VectorAssign(w, q.AsMask(), nil, Degree, GrB.All(n), GrB.DescRS))
+					edgesInFrontier, e := GrB.VectorReduce(GrB.PlusMonoid[int](), w, nil)
 					GrB.OK(e)
 					edgesUnexplored -= edgesInFrontier
 					switchToPull = growing && edgesInFrontier > int(float64(edgesUnexplored)/alpha)
@@ -149,9 +149,9 @@ func breadthFirstSearch[D GrB.Predefined, Int int32 | int64, Q int32 | int64 | b
 		GrB.OK(q.SetSparsityControl(sparsity))
 
 		if doPush {
-			GrB.OK(q.VxM(mask, nil, semiring, q, GrB.MatrixView[Q, D](A), GrB.DescRSC))
+			GrB.OK(GrB.VxM(q, mask, nil, semiring, q, GrB.MatrixView[Q, D](A), GrB.DescRSC))
 		} else {
-			GrB.OK(q.MxV(mask, nil, semiring, GrB.MatrixView[Q, D](AT), q, GrB.DescRSC))
+			GrB.OK(GrB.MxV(q, mask, nil, semiring, GrB.MatrixView[Q, D](AT), q, GrB.DescRSC))
 		}
 
 		lastNq = nq
@@ -162,10 +162,10 @@ func breadthFirstSearch[D GrB.Predefined, Int int32 | int64, Q int32 | int64 | b
 		}
 
 		if computeParent {
-			GrB.OK(pi.Assign(q.AsMask(), nil, GrB.VectorView[Int, Q](q), GrB.All(n), GrB.DescS))
+			GrB.OK(GrB.VectorAssign(pi, q.AsMask(), nil, GrB.VectorView[Int, Q](q), GrB.All(n), GrB.DescS))
 		}
 		if computeLevel {
-			GrB.OK(v.AssignConstant(q.AsMask(), nil, Int(k), GrB.All(n), GrB.DescS))
+			GrB.OK(GrB.VectorAssignConstant(v, q.AsMask(), nil, Int(k), GrB.All(n), GrB.DescS))
 		}
 	}
 

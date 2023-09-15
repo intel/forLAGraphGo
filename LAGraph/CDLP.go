@@ -45,14 +45,14 @@ func (G *Graph[D]) CDLP(itermax int) (result GrB.Vector[int], err error) {
 	S, err := GrB.MatrixNew[int](n, n)
 	GrB.OK(err)
 	defer try(S.Free)
-	GrB.OK(S.ApplyBinaryOp2nd(nil, nil, GrB.Oneb[int](), GrB.MatrixView[int, D](A), 0, nil))
+	GrB.OK(GrB.MatrixApplyBinaryOp2nd(S, nil, nil, GrB.Oneb[int](), GrB.MatrixView[int, D](A), 0, nil))
 
 	var Tps, Tis []int
 	if G.Kind == AdjacencyDirected {
 		AT, e := GrB.MatrixNew[int](n, n)
 		GrB.OK(e)
 		defer try(AT.Free)
-		GrB.OK(AT.Transpose(nil, nil, S, nil))
+		GrB.OK(GrB.Transpose(AT, nil, nil, S, nil))
 		Tp, Ti, Tx, _, _, e := AT.UnpackCSR(true, nil)
 		GrB.OK(e)
 		Tx.Free()

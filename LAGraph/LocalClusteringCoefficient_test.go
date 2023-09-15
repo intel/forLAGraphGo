@@ -46,9 +46,9 @@ func TestLCC(t *testing.T) {
 		c, err := G.LocalClusteringCoefficient()
 		try(err)
 
-		try(cgood.EWiseAddBinaryOp(nil, nil, GrB.Minus[float64](), cgood, c, nil))
-		try(cgood.Apply(nil, nil, GrB.Abs[float64](), cgood, nil))
-		diff, err := cgood.Reduce(GrB.MaxMonoid[float64](), nil)
+		try(GrB.VectorEWiseAddBinaryOp(cgood, nil, nil, GrB.Minus[float64](), cgood, c, nil))
+		try(GrB.VectorApply(cgood, nil, nil, GrB.Abs[float64](), cgood, nil))
+		diff, err := GrB.VectorReduce(GrB.MaxMonoid[float64](), cgood, nil)
 		try(err)
 		if diff >= 1e-6 {
 			t.Log(filename)

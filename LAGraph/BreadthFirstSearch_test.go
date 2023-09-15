@@ -59,7 +59,7 @@ func checkBFS[D GrB.Predefined](level, parent *GrB.Vector[int], G *LAGraph.Graph
 	for head < tail {
 		u := queue[head]
 		head++
-		GrB.OK(Row.ColExtract(nil, nil, GrB.MatrixView[bool](G.A), GrB.All(n), u, GrB.DescT0))
+		GrB.OK(GrB.MatrixColExtract(Row, nil, nil, GrB.MatrixView[bool](G.A), GrB.All(n), u, GrB.DescT0))
 		neighbors = neighbors[:0]
 		rowValues = rowValues[:0]
 		GrB.OK(Row.ExtractTuples(&neighbors, &rowValues))

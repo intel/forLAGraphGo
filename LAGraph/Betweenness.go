@@ -48,7 +48,7 @@ func (G *Graph[D]) Betweenness(sources []int) (centrality GrB.Vector[float64], e
 		GrB.OK(frontier.SetElement(1, i, src))
 	}
 
-	GrB.OK(frontier.MxM(paths.AsMask(), nil, GrB.PlusFirst[float64](), frontier, A, GrB.DescRSC))
+	GrB.OK(GrB.MxM(frontier, paths.AsMask(), nil, GrB.PlusFirst[float64](), frontier, A, GrB.DescRSC))
 
 	S := make([]GrB.Matrix[bool], n+1)
 	defer func() {
@@ -67,7 +67,7 @@ func (G *Graph[D]) Betweenness(sources []int) (centrality GrB.Vector[float64], e
 	for ; frontierSize > 0 && depth < n; depth++ {
 		S[depth], err = MatrixStructure(frontier)
 		GrB.OK(err)
-		GrB.OK(paths.Assign(nil, &plus, frontier, GrB.All(ns), GrB.All(n), nil))
+		GrB.OK(GrB.MatrixAssign(paths, nil, &plus, frontier, GrB.All(ns), GrB.All(n), nil))
 
 		frontierDensity := float64(frontierSize) / float64(ns*n)
 		var doPull bool
@@ -79,10 +79,10 @@ func (G *Graph[D]) Betweenness(sources []int) (centrality GrB.Vector[float64], e
 
 		if doPull {
 			GrB.OK(frontier.SetSparsityControl(GrB.Bitmap))
-			GrB.OK(frontier.MxM(paths.AsMask(), nil, GrB.PlusFirst[float64](), frontier, AT, GrB.DescRSCT1))
+			GrB.OK(GrB.MxM(frontier, paths.AsMask(), nil, GrB.PlusFirst[float64](), frontier, AT, GrB.DescRSCT1))
 		} else {
 			GrB.OK(frontier.SetSparsityControl(GrB.Sparse))
-			GrB.OK(frontier.MxM(paths.AsMask(), nil, GrB.PlusFirst[float64](), frontier, A, GrB.DescRSC))
+			GrB.OK(GrB.MxM(frontier, paths.AsMask(), nil, GrB.PlusFirst[float64](), frontier, A, GrB.DescRSC))
 		}
 
 		lastWasPull = doPull
@@ -95,14 +95,14 @@ func (G *Graph[D]) Betweenness(sources []int) (centrality GrB.Vector[float64], e
 	bcUpdate, err := GrB.MatrixNew[float64](ns, n)
 	GrB.OK(err)
 	defer try(bcUpdate.Free)
-	GrB.OK(bcUpdate.AssignConstant(nil, nil, 1, GrB.All(ns), GrB.All(n), nil))
+	GrB.OK(GrB.MatrixAssignConstant(bcUpdate, nil, nil, 1, GrB.All(ns), GrB.All(n), nil))
 
 	W, err := GrB.MatrixNew[float64](ns, n)
 	GrB.OK(err)
 	defer try(W.Free)
 
 	for i := depth - 1; i > 0; i-- {
-		GrB.OK(W.EWiseMultBinaryOp(&S[i], nil, GrB.Div[float64](), bcUpdate, paths, GrB.DescRS))
+		GrB.OK(GrB.MatrixEWiseMultBinaryOp(W, &S[i], nil, GrB.Div[float64](), bcUpdate, paths, GrB.DescRS))
 		wsize, e := W.Nvals()
 		GrB.OK(e)
 		ssize, e := S[i-1].Nvals()
@@ -113,19 +113,19 @@ func (G *Graph[D]) Betweenness(sources []int) (centrality GrB.Vector[float64], e
 
 		if doPull {
 			GrB.OK(W.SetSparsityControl(GrB.Bitmap))
-			GrB.OK(W.MxM(&S[i-1], nil, GrB.PlusFirst[float64](), W, A, GrB.DescRST1))
+			GrB.OK(GrB.MxM(W, &S[i-1], nil, GrB.PlusFirst[float64](), W, A, GrB.DescRST1))
 		} else {
 			GrB.OK(W.SetSparsityControl(GrB.Sparse))
-			GrB.OK(W.MxM(&S[i-1], nil, GrB.PlusFirst[float64](), W, AT, GrB.DescRS))
+			GrB.OK(GrB.MxM(W, &S[i-1], nil, GrB.PlusFirst[float64](), W, AT, GrB.DescRS))
 		}
 
-		GrB.OK(bcUpdate.EWiseMultBinaryOp(nil, &plus, GrB.Times[float64](), W, paths, nil))
+		GrB.OK(GrB.MatrixEWiseMultBinaryOp(bcUpdate, nil, &plus, GrB.Times[float64](), W, paths, nil))
 	}
 
 	centrality, err = GrB.VectorNew[float64](n)
 	GrB.OK(err)
-	GrB.OK(centrality.AssignConstant(nil, nil, float64(-ns), GrB.All(n), nil))
-	GrB.OK(centrality.MatrixReduceMonoid(nil, &plus, GrB.PlusMonoid[float64](), bcUpdate, GrB.DescT0))
+	GrB.OK(GrB.VectorAssignConstant(centrality, nil, nil, float64(-ns), GrB.All(n), nil))
+	GrB.OK(GrB.MatrixReduceMonoid(centrality, nil, &plus, GrB.PlusMonoid[float64](), bcUpdate, GrB.DescT0))
 
 	return
 }

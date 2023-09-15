@@ -30,9 +30,9 @@ func prDifference(centrality GrB.Vector[float32], matlabResult []float64) (diff 
 	delta, err := GrB.VectorNew[float32](n)
 	GrB.OK(err)
 	defer try(delta.Free)
-	GrB.OK(delta.EWiseAddBinaryOp(nil, nil, GrB.Minus[float32](), matlab, centrality, nil))
-	GrB.OK(delta.Apply(nil, nil, GrB.Abs[float32](), delta, nil))
-	return delta.Reduce(GrB.MaxMonoid[float32](), nil)
+	GrB.OK(GrB.VectorEWiseAddBinaryOp(delta, nil, nil, GrB.Minus[float32](), matlab, centrality, nil))
+	GrB.OK(GrB.VectorApply(delta, nil, nil, GrB.Abs[float32](), delta, nil))
+	return GrB.VectorReduce(GrB.MaxMonoid[float32](), delta, nil)
 }
 
 var (
@@ -175,7 +175,7 @@ func TestRanker(t *testing.T) {
 		try(err)
 		diff, err := prDifference(centrality, karateRank)
 		try(err)
-		_, err = centrality.Reduce(GrB.PlusMonoid[float32](), nil)
+		_, err = GrB.VectorReduce(GrB.PlusMonoid[float32](), centrality, nil)
 		try(err)
 		if diff >= 1e-4 {
 			t.Fail()
@@ -186,7 +186,7 @@ func TestRanker(t *testing.T) {
 		try(err)
 		diff, err = prDifference(centrality, karateRank)
 		try(err)
-		_, err = centrality.Reduce(GrB.PlusMonoid[float32](), nil)
+		_, err = GrB.VectorReduce(GrB.PlusMonoid[float32](), centrality, nil)
 		try(err)
 		if diff >= 1e-4 {
 			t.Fail()
@@ -215,7 +215,7 @@ func TestRanker(t *testing.T) {
 		try(err)
 		diff, err := prDifference(centrality, west0067Rank)
 		try(err)
-		_, err = centrality.Reduce(GrB.PlusMonoid[float32](), nil)
+		_, err = GrB.VectorReduce(GrB.PlusMonoid[float32](), centrality, nil)
 		try(err)
 		if diff >= 1e-4 {
 			t.Fail()
@@ -226,7 +226,7 @@ func TestRanker(t *testing.T) {
 		try(err)
 		diff, err = prDifference(centrality, west0067Rank)
 		try(err)
-		_, err = centrality.Reduce(GrB.PlusMonoid[float32](), nil)
+		_, err = GrB.VectorReduce(GrB.PlusMonoid[float32](), centrality, nil)
 		try(err)
 		if diff >= 1e-4 {
 			t.Fail()
@@ -250,7 +250,7 @@ func TestRanker(t *testing.T) {
 		try(err)
 		_, err = prDifference(centrality, ldbcDirectedExampleRank)
 		try(err)
-		_, err = centrality.Reduce(GrB.PlusMonoid[float32](), nil)
+		_, err = GrB.VectorReduce(GrB.PlusMonoid[float32](), centrality, nil)
 		try(err)
 		try(centrality.Free())
 
@@ -258,7 +258,7 @@ func TestRanker(t *testing.T) {
 		try(err)
 		diff, err := prDifference(centrality, ldbcDirectedExampleRank)
 		try(err)
-		_, err = centrality.Reduce(GrB.PlusMonoid[float32](), nil)
+		_, err = GrB.VectorReduce(GrB.PlusMonoid[float32](), centrality, nil)
 		try(err)
 		if diff >= 1e-4 {
 			t.Fail()

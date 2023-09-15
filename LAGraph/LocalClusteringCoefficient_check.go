@@ -52,7 +52,7 @@ func (G *Graph[D]) LCCCheck() (coefficients GrB.Vector[float64], err error) {
 	S, err := GrB.MatrixNew[bool](n, n)
 	GrB.OK(err)
 	defer try(S.Free)
-	GrB.OK(S.AssignConstant(A.AsMask(), nil, true, GrB.All(n), GrB.All(n), GrB.DescS))
+	GrB.OK(GrB.MatrixAssignConstant(S, A.AsMask(), nil, true, GrB.All(n), GrB.All(n), GrB.DescS))
 	if G.NSelfEdges != 0 {
 		GrB.OK(GrB.MatrixSelect(S, nil, nil, GrB.Offdiag[bool](), S, 0, nil))
 	}
@@ -62,7 +62,7 @@ func (G *Graph[D]) LCCCheck() (coefficients GrB.Vector[float64], err error) {
 		T, err = GrB.MatrixNew[bool](n, n)
 		GrB.OK(err)
 		defer try(T.Free)
-		GrB.OK(T.EWiseAddBinaryOp(nil, nil, GrB.Oneb[bool](), S, S, GrB.DescT1))
+		GrB.OK(GrB.MatrixEWiseAddBinaryOp(T, nil, nil, GrB.Oneb[bool](), S, S, GrB.DescT1))
 	}
 
 	Sp, Si, Sx, _, _, err := S.UnpackCSR(false, nil)

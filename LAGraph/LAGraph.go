@@ -171,7 +171,7 @@ func (G *Graph[D]) CachedAT() (cacheOk bool, err error) {
 	GrB.OK(err)
 	AT, err := GrB.MatrixNew[D](ncols, nrows)
 	GrB.OK(err)
-	GrB.OK(AT.Transpose(nil, nil, A, nil))
+	GrB.OK(GrB.Transpose(AT, nil, nil, A, nil))
 	G.AT = AT
 	return true, nil
 }
@@ -201,8 +201,8 @@ func (G *Graph[D]) CachedIsSymmetricStructure() (err error) {
 	defer func() {
 		GrB.OK(C.Free())
 	}()
-	GrB.OK(C.EWiseMultBinaryOp(
-		nil, nil,
+	GrB.OK(GrB.MatrixEWiseMultBinaryOp(
+		C, nil, nil,
 		GrB.Oneb[bool](),
 		GrB.MatrixView[bool, D](A),
 		GrB.MatrixView[bool, D](G.AT),
@@ -240,8 +240,8 @@ func (G *Graph[D]) CachedOutDegree() (err error) {
 	defer func() {
 		GrB.OK(x.Free())
 	}()
-	GrB.OK(x.AssignConstant(nil, nil, 0, GrB.All(ncols), nil))
-	GrB.OK(outDegree.MxV(nil, nil, PlusOne[int](), GrB.MatrixView[int, D](A), x, nil))
+	GrB.OK(GrB.VectorAssignConstant(x, nil, nil, 0, GrB.All(ncols), nil))
+	GrB.OK(GrB.MxV(outDegree, nil, nil, PlusOne[int](), GrB.MatrixView[int, D](A), x, nil))
 	G.OutDegree = outDegree
 	return nil
 }
@@ -270,11 +270,11 @@ func (G *Graph[D]) CachedInDegree() (cacheOk bool, err error) {
 	defer func() {
 		GrB.OK(x.Free())
 	}()
-	GrB.OK(x.AssignConstant(nil, nil, 0, GrB.All(nrows), nil))
+	GrB.OK(GrB.VectorAssignConstant(x, nil, nil, 0, GrB.All(nrows), nil))
 	if AT.Valid() {
-		GrB.OK(inDegree.MxV(nil, nil, PlusOne[int](), GrB.MatrixView[int, D](AT), x, nil))
+		GrB.OK(GrB.MxV(inDegree, nil, nil, PlusOne[int](), GrB.MatrixView[int, D](AT), x, nil))
 	} else {
-		GrB.OK(inDegree.MxV(nil, nil, PlusOne[int](), GrB.MatrixView[int, D](A), x, GrB.DescT0))
+		GrB.OK(GrB.MxV(inDegree, nil, nil, PlusOne[int](), GrB.MatrixView[int, D](A), x, GrB.DescT0))
 	}
 	G.InDegree = inDegree
 	return true, nil
@@ -327,7 +327,7 @@ func (G *Graph[D]) CachedEMin() (err error) {
 	if G.EMin, err = GrB.ScalarNew[D](); err != nil {
 		return
 	}
-	if err = G.EMin.MatrixReduceMonoid(nil, monoid, G.A, nil); err != nil {
+	if err = GrB.MatrixReduceMonoidScalar(G.EMin, nil, monoid, G.A, nil); err != nil {
 		return
 	}
 	G.EMinState = Value
@@ -373,7 +373,7 @@ func (G *Graph[D]) CachedEMax() (err error) {
 	if G.EMax, err = GrB.ScalarNew[D](); err != nil {
 		return
 	}
-	if err = G.EMax.MatrixReduceMonoid(nil, monoid, G.A, nil); err != nil {
+	if err = GrB.MatrixReduceMonoidScalar(G.EMax, nil, monoid, G.A, nil); err != nil {
 		return
 	}
 	G.EMaxState = Value
@@ -457,7 +457,7 @@ func MatrixStructure[D any](A GrB.Matrix[D]) (C GrB.Matrix[bool], err error) {
 			_ = C.Free()
 		}
 	}()
-	GrB.OK(C.AssignConstant(A.AsMask(), nil, true, GrB.All(nrows), GrB.All(ncols), GrB.DescS))
+	GrB.OK(GrB.MatrixAssignConstant(C, A.AsMask(), nil, true, GrB.All(nrows), GrB.All(ncols), GrB.DescS))
 	return
 }
 
@@ -472,7 +472,7 @@ func VectorStructure[D any](u GrB.Vector[D]) (w GrB.Vector[bool], err error) {
 			_ = w.Free()
 		}
 	}()
-	GrB.OK(w.AssignConstant(u.AsMask(), nil, true, GrB.All(n), GrB.DescS))
+	GrB.OK(GrB.VectorAssignConstant(w, u.AsMask(), nil, true, GrB.All(n), GrB.DescS))
 	return
 }
 
@@ -637,7 +637,7 @@ func MatrixIsEqualOp[DA, DB any](A GrB.Matrix[DA], B GrB.Matrix[DB], op GrB.Bina
 	if nvals != nvals1 {
 		return false, nil
 	}
-	return C.Reduce(GrB.LandMonoidBool, nil)
+	return GrB.MatrixReduce(GrB.LandMonoidBool, C, nil)
 }
 
 func VectorIsEqual[D GrB.Predefined | GrB.Complex](u, v GrB.Vector[D]) (result bool, err error) {
@@ -677,7 +677,7 @@ func VectorIsEqualOp[Du, Dv any](u GrB.Vector[Du], v GrB.Vector[Dv], op GrB.Bina
 	if nvals != nvals1 {
 		return
 	}
-	return w.Reduce(GrB.LandMonoidBool, nil)
+	return GrB.VectorReduce(GrB.LandMonoidBool, w, nil)
 }
 
 func (G *Graph[D]) SortByDegree(byOut, ascending bool) (permutationVector []int, err error) {
