@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/intel/forGraphBLASGo/GrB"
 	"io"
+	"math"
 	"strconv"
 	"strings"
 )
@@ -238,6 +239,17 @@ func readHeader(r io.Reader) (hdr header, scanner *bufio.Scanner, err error) {
 			return
 		}
 		nvals = nrows * ncols
+	}
+	if nrows < 1 || nrows > math.MaxInt {
+		err = fmt.Errorf("MatrixMarket header line nrows out of range %v", nrows)
+		return
+	}
+	if ncols < 1 || ncols > math.MaxInt {
+		err = fmt.Errorf("MatrixMarket header line ncols out of range %v", ncols)
+		return
+	}
+	if nvals > math.MaxInt {
+		err = fmt.Errorf("MatrixMarket header line nvals out of range %v", nvals)
 	}
 	return header{
 		format:  mmFormat,
