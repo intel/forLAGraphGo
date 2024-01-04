@@ -250,6 +250,7 @@ func readHeader(r io.Reader) (hdr header, scanner *bufio.Scanner, err error) {
 	}
 	if nvals > math.MaxInt {
 		err = fmt.Errorf("MatrixMarket header line nvals out of range %v", nvals)
+		return
 	}
 	return header{
 		format:  mmFormat,
