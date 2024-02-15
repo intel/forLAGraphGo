@@ -45,7 +45,7 @@ func main() {
 	ntrials := 0
 	var tt time.Duration
 
-	for nrepeat := 0; nrepeat <= 1; nrepeat++ {
+	for range 2 {
 		ntrials = 0
 		tt = 0
 
@@ -54,7 +54,7 @@ func main() {
 			var s strings.Builder
 			fmt.Fprintf(&s, "Trial %v : sources: [", ntrials)
 			var vertexList [batchSize]GrB.Index
-			for k := 0; k < batchSize; k++ {
+			for k := range batchSize {
 				source, _, err := SourceNodes.ExtractElement(k+kstart, 0)
 				try(err)
 				source--

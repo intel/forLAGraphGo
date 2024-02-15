@@ -78,7 +78,7 @@ func main() {
 	log.Printf("warmup time %v\n", time.Since(tt))
 
 	var ttot time.Duration
-	for trial := 0; trial < ntrials; trial++ {
+	for trial := range ntrials {
 		tt = time.Now()
 		c, _, err = G.PageRankGAP(damping, tol, itermax)
 		try(err)

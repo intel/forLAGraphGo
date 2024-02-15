@@ -1,6 +1,6 @@
 module github.com/intel/forLAGraphGo
 
-go 1.21.0
+go 1.22
 
 require (
 	github.com/intel/forGoParallel v0.0.0-20230817114341-0dbce1d46778

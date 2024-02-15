@@ -162,7 +162,7 @@ func checkSSSP[D LAGraph.SingleSourceShortestPathDomains](pathLength GrB.Vector[
 		}
 		weights := axs[delta:]
 
-		for k := 0; k < degree; k++ {
+		for k := range degree {
 			v := nodeUAdjancencyList[k]
 			if _, ok := hp.iheap[v]; !ok {
 				continue
@@ -190,7 +190,7 @@ func checkSSSP[D LAGraph.SingleSourceShortestPathDomains](pathLength GrB.Vector[
 
 	GrB.OK(G.A.PackCSR(&ap, &aj, &ax, iso, jumbled, nil))
 
-	for i := 0; i < n; i++ {
+	for i := range n {
 		var ok bool
 		e := float64(0)
 		if math.IsInf(distance[i], +1) {
@@ -208,7 +208,7 @@ func checkSSSP[D LAGraph.SingleSourceShortestPathDomains](pathLength GrB.Vector[
 		}
 	}
 
-	for i := 0; i < n; i++ {
+	for i := range n {
 		ok := reachable[i] == reachableIn[i]
 		if !ok {
 			return errors.New("invalid reach")

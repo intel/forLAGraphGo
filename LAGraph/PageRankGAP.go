@@ -59,7 +59,10 @@ func (G *Graph[D]) PageRankGAP(damping, tolerance float32, iterMax int) (central
 	GrB.OK(GrB.VectorEWiseAddBinaryOp(d, nil, nil, GrB.Max[float32](), d1, d, nil))
 	GrB.OK(d1.Free())
 
-	for iterations = 0; iterations < iterMax && rdiff > tolerance; iterations++ {
+	for iterations = range iterMax {
+		if rdiff <= tolerance {
+			break
+		}
 		t, r = r, t
 		GrB.OK(GrB.VectorEWiseMultBinaryOp(w, nil, nil, GrB.Div[float32](), t, d, nil))
 		GrB.OK(GrB.VectorAssignConstant(r, nil, nil, teleport, GrB.All(n), nil))

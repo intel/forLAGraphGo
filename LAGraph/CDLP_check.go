@@ -42,7 +42,7 @@ func (G *Graph[D]) CDLPCheck(itermax int) (result GrB.Vector[int], err error) {
 	{
 		LIs := LI.UnsafeSlice()
 		LXs := LX.UnsafeSlice()
-		for i := 0; i < n; i++ {
+		for i := range n {
 			LIs[i] = i
 			LXs[i] = i
 		}
@@ -72,7 +72,7 @@ func (G *Graph[D]) CDLPCheck(itermax int) (result GrB.Vector[int], err error) {
 	}
 
 	var I, X []int
-	for iteration := 0; iteration < itermax; iteration++ {
+	for range itermax {
 		GrB.OK(GrB.MxM(S, nil, nil, GrB.MinSecondSemiring[int](), S, L, nil))
 		I = I[:0]
 		X = X[:0]
@@ -90,18 +90,18 @@ func (G *Graph[D]) CDLPCheck(itermax int) (result GrB.Vector[int], err error) {
 		modeLength := 0
 		runLength := 1
 
-		for k := 1; k <= nnz; k++ {
-			if k == nnz || I[k-1] != I[k] || X[k-1] != X[k] {
+		for k := range nnz {
+			if k+1 == nnz || I[k] != I[k+1] || X[k] != X[k+1] {
 				if runLength > modeLength {
-					modeValue = X[k-1]
+					modeValue = X[k]
 					modeLength = runLength
 				}
 				runLength = 0
 			}
 			runLength++
 
-			if k == nnz || I[k-1] != I[k] {
-				GrB.OK(L.SetElement(modeValue, I[k-1], I[k-1]))
+			if k+1 == nnz || I[k] != I[k+1] {
+				GrB.OK(L.SetElement(modeValue, I[k], I[k]))
 				modeLength = 0
 			}
 		}

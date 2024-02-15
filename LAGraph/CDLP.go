@@ -85,7 +85,7 @@ func (G *Graph[D]) CDLP(itermax int) (result GrB.Vector[int], err error) {
 	}
 	Lnext := make([]int, n)
 
-	for iteration := 0; iteration < itermax; iteration++ {
+	for range itermax {
 		parallel.Range(0, n, n, func(low, high int) {
 			counts := make(map[int]int)
 			for i := low; i < high; i++ {
@@ -106,7 +106,7 @@ func (G *Graph[D]) CDLP(itermax int) (result GrB.Vector[int], err error) {
 		})
 		L, Lnext = Lnext, L
 		changed := false
-		for i := 0; i < n; i++ {
+		for i := range n {
 			if L[i] != Lnext[i] {
 				changed = true
 				break

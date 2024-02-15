@@ -157,7 +157,7 @@ func connectedComponents[D GrB.Predefined, Int int32 | int64, Uint uint32 | uint
 		ranges := make([]int, nthreads+1)
 		counts := make([]int, nthreads+1)
 
-		for tid := 0; tid <= nthreads; tid++ {
+		for tid := range nthreads + 1 {
 			ranges[tid] = (n*tid + nthreads - 1) / nthreads
 		}
 
@@ -165,7 +165,7 @@ func connectedComponents[D GrB.Predefined, Int int32 | int64, Uint uint32 | uint
 
 		var wg sync.WaitGroup
 		wg.Add(nthreads)
-		for tid := 0; tid < nthreads; tid++ {
+		for tid := range nthreads {
 			go func(tid int) {
 				defer wg.Done()
 				for i := ranges[tid]; i < ranges[tid+1]; i++ {
@@ -176,7 +176,7 @@ func connectedComponents[D GrB.Predefined, Int int32 | int64, Uint uint32 | uint
 		}
 		wg.Wait()
 
-		for tid := 0; tid < nthreads; tid++ {
+		for tid := range nthreads {
 			counts[tid+1] += counts[tid]
 		}
 
@@ -185,13 +185,16 @@ func connectedComponents[D GrB.Predefined, Int int32 | int64, Uint uint32 | uint
 		tjs := tj.UnsafeSlice()
 
 		wg.Add(nthreads)
-		for tid := 0; tid < nthreads; tid++ {
+		for tid := range nthreads {
 			go func(tid int) {
 				defer wg.Done()
 				p := counts[tid]
 				tps[ranges[tid]] = p
 				for i := ranges[tid]; i < ranges[tid+1]; i++ {
-					for j := 0; j < fastsvSamples && aps[i]+j < aps[i+1]; j++ {
+					for j := range fastsvSamples {
+						if aps[i]+j >= aps[i+1] {
+							break
+						}
 						tjs[p] = ajs[aps[i]+j]
 						p++
 					}
@@ -214,7 +217,7 @@ func connectedComponents[D GrB.Predefined, Int int32 | int64, Uint uint32 | uint
 		rnd := rand.New(rand.NewSource(rand.Int63()))
 		key := -1
 		maxCount := int32(0)
-		for k := 0; k < hashSamples; k++ {
+		for range hashSamples {
 			x := pxs[rnd.Intn(n)]
 			htCount[x]++
 			if htCount[x] > maxCount {
@@ -228,7 +231,7 @@ func connectedComponents[D GrB.Predefined, Int int32 | int64, Uint uint32 | uint
 		GrB.OK(err)
 
 		wg.Add(nthreads)
-		for tid := 0; tid < nthreads; tid++ {
+		for tid := range nthreads {
 			go func(tid int) {
 				defer wg.Done()
 				p := aps[ranges[tid]]
@@ -255,14 +258,14 @@ func connectedComponents[D GrB.Predefined, Int int32 | int64, Uint uint32 | uint
 		wg.Wait()
 
 		nvals = 0
-		for tid := 0; tid < nthreads; tid++ {
+		for tid := range nthreads {
 			copy(tjs[nvals:nvals+counts[tid]], tjs[tps[ranges[tid]]:])
 			nvals += counts[tid]
 			counts[tid] = nvals - counts[tid]
 		}
 
 		wg.Add(nthreads)
-		for tid := 0; tid < nthreads; tid++ {
+		for tid := range nthreads {
 			go func(tid int) {
 				defer wg.Done()
 				p := tps[ranges[tid]]

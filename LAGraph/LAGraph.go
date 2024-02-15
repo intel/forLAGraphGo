@@ -558,7 +558,7 @@ func MatrixPrint[D GrB.Predefined](A GrB.Matrix[D], printLevel GrB.PrintLevel) (
 	var X []D
 	GrB.OK(A.ExtractTuples(&I, &J, &X))
 	summary := (printLevel == 2 || printLevel == 4) && (nvals > lgShortLen)
-	for k := 0; k < nvals; k++ {
+	for k := range nvals {
 		_, err = fmt.Printf("   (%v, %v)   %v\n", I[k], J[k], X[k])
 		GrB.OK(err)
 		if summary && k > lgShortLen {
@@ -588,7 +588,7 @@ func VectorPrint[D GrB.Predefined](v GrB.Vector[D], printLevel GrB.PrintLevel) (
 	var X []D
 	GrB.OK(v.ExtractTuples(&I, &X))
 	summary := (printLevel == 2 || printLevel == 4) && nvals > lgShortLen
-	for k := 0; k < nvals; k++ {
+	for k := range nvals {
 		_, err = fmt.Printf("   (%v)   %v\n", I[k], X[k])
 		GrB.OK(err)
 		if summary && k > lgShortLen {
@@ -744,7 +744,7 @@ func (G *Graph[D]) SampleDegree(byOut bool, nSamples int, rnd *rand.Rand) (sampl
 	n, err := Degree.Size()
 	GrB.OK(err)
 	dsum := 0
-	for k := 0; k < nSamples; k++ {
+	for k := range nSamples {
 		i := rnd.Intn(n)
 		d, _, e := Degree.ExtractElement(i)
 		GrB.OK(e)

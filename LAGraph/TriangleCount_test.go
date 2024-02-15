@@ -284,8 +284,8 @@ func TestTriangleCountAutosort(t *testing.T) {
 	defer func() {
 		try(A.Free())
 	}()
-	for k := 0; k <= 10; k++ {
-		for i := 0; i < n; i++ {
+	for k := range 11 {
+		for i := range n {
 			try(A.SetElement(true, i, k))
 			try(A.SetElement(true, k, i))
 		}

@@ -37,7 +37,7 @@ func main() {
 	try(err)
 	log.Println("warmup: parent only, pushpull:", time.Since(twarmup))
 
-	for trial := 0; trial < ntrials; trial++ {
+	for trial := range ntrials {
 		src, _, err := SourceNodes.ExtractElement(trial, 0)
 		try(err)
 		src--

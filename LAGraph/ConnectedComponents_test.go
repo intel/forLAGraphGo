@@ -29,7 +29,7 @@ func checkCC[D GrB.Number](Component GrB.Vector[int], G *LAGraph.Graph[D]) (err 
 	GrB.OK(err)
 	count := queue
 	ncompIn := 0
-	for i := 0; i < n; i++ {
+	for i := range n {
 		comp := componentIn[i]
 		if comp < 0 || comp > n {
 			return errors.New("comp out of range")
@@ -49,7 +49,7 @@ func checkCC[D GrB.Number](Component GrB.Vector[int], G *LAGraph.Graph[D]) (err 
 	visited := make([]bool, n)
 
 	ncomp := 0
-	for src := 0; src < n; src++ {
+	for src := range n {
 		if visited[src] {
 			continue
 		}
@@ -67,7 +67,7 @@ func checkCC[D GrB.Number](Component GrB.Vector[int], G *LAGraph.Graph[D]) (err 
 			head++
 			degree := aps[u+1] - aps[u]
 			nodeUAdjacencyList := ajs[aps[u]:]
-			for k := 0; k < degree; k++ {
+			for k := range degree {
 				v := nodeUAdjacencyList[k]
 				if comp != componentIn[u] {
 					return errors.New("component not the same as source")
@@ -111,7 +111,7 @@ func countConnectedComponents(t *testing.T, C GrB.Vector[int]) int {
 		t.Error(err)
 	}
 	ncomponents := 0
-	for i := 0; i < n; i++ {
+	for i := range n {
 		if comp, ok, err := C.ExtractElement(i); err != nil {
 			t.Error(err)
 		} else if ok && comp == i {
@@ -135,7 +135,7 @@ func runTestCCMatrices[D GrB.Number](A GrB.Matrix[D], ncomp int, t *testing.T) {
 	n, err := A.Nrows()
 	try(err)
 
-	for trial := 0; trial <= 1; trial++ {
+	for range 2 {
 		C, err := G.ConnectedComponents()
 		try(err)
 		defer tryf(C.Free)

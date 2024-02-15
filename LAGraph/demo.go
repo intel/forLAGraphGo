@@ -385,7 +385,7 @@ func ReadProblem[D GrB.Number](computeSourceNodes, makeSymmetric, removeSelfEdge
 				_ = srcNodes.Free()
 			}
 		}()
-		for k := 0; k < nSources; k++ {
+		for k := range nSources {
 			i := 1 + rand.Intn(n)
 			GrB.OK(srcNodes.SetElement(i, k, 0))
 		}

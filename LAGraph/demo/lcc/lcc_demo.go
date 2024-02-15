@@ -92,7 +92,7 @@ func main() {
 	try(c.Free())
 
 	var ttot time.Duration
-	for trial := 0; trial < ntrials; trial++ {
+	for trial := range ntrials {
 		tt = time.Now()
 		c, err = G.LocalClusteringCoefficient()
 		try(err)

@@ -74,7 +74,7 @@ func checkBFS[D GrB.Predefined](level, parent *GrB.Vector[int], G *LAGraph.Graph
 	}
 
 	if len(levelIn) > 0 {
-		for i := 0; i < n; i++ {
+		for i := range n {
 			if levelIn[i] != levelCheck[i] {
 				err = invalidLevel
 				return
@@ -83,7 +83,7 @@ func checkBFS[D GrB.Predefined](level, parent *GrB.Vector[int], G *LAGraph.Graph
 	}
 
 	if len(parentIn) > 0 {
-		for i := 0; i < n; i++ {
+		for i := range n {
 			if i == src {
 				if parentIn[src] != src || !visited[src] {
 					err = invalidParent
@@ -202,14 +202,14 @@ func checkKarateParents30(parents GrB.Vector[int]) (ok bool, err error) {
 		return
 	}
 
-	for ix := 0; ix < zacharyNumNodes; ix++ {
+	for ix := range zacharyNumNodes {
 		var parentId int
 		if parentId, ok, err = parents.ExtractElement(ix); err != nil || !ok {
 			return
 		}
 
 		ok = false
-		for k := 0; k <= 2; k++ {
+		for k := range 3 {
 			validParentId := parent30[ix][k]
 			if validParentId < 0 {
 				ok = false
@@ -246,7 +246,7 @@ func checkKarateLevels30(levels GrB.Vector[int]) (ok bool, err error) {
 		return
 	}
 
-	for ix := 0; ix < zacharyNumNodes; ix++ {
+	for ix := range zacharyNumNodes {
 		var lvl int
 		if lvl, ok, err = levels.ExtractElement(ix); err != nil || !ok {
 			return
@@ -369,7 +369,7 @@ func runTestBreadthFirstSearchMany[D GrB.Number](A GrB.Matrix[D], kind LAGraph.K
 	} else {
 		step = n/4 + 1
 	}
-	for caching := 0; caching <= 1; caching++ {
+	for range 2 {
 		for src := 0; src < n; src += step {
 			level, parent, err := G.BreadthFirstSearch(src, true, true)
 			try(err)

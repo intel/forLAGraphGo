@@ -43,7 +43,7 @@ func main() {
 			continue
 		}
 
-		for trial := 0; trial < ntrials; trial++ {
+		for trial := range ntrials {
 			tt := time.Now()
 			nt2, _, _, err := G.TriangleCountMethods(method, LAGraph.TriangleCountAutoSort)
 			try(err)
