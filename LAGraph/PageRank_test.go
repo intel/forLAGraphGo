@@ -177,6 +177,7 @@ func TestRanker(t *testing.T) {
 		try(err)
 		_, err = GrB.VectorReduce(GrB.PlusMonoid[float32](), centrality, nil)
 		try(err)
+		t.Log(diff)
 		if diff >= 1e-4 {
 			t.Fail()
 		}
@@ -217,6 +218,7 @@ func TestRanker(t *testing.T) {
 		try(err)
 		_, err = GrB.VectorReduce(GrB.PlusMonoid[float32](), centrality, nil)
 		try(err)
+		t.Log(diff)
 		if diff >= 1e-4 {
 			t.Fail()
 		}
@@ -248,15 +250,16 @@ func TestRanker(t *testing.T) {
 		try(G.CachedOutDegree())
 		centrality, _, err := G.PageRankGAP(0.85, 1e-4, 100)
 		try(err)
-		_, err = prDifference(centrality, ldbcDirectedExampleRank)
+		diff, err := prDifference(centrality, ldbcDirectedExampleRank)
 		try(err)
 		_, err = GrB.VectorReduce(GrB.PlusMonoid[float32](), centrality, nil)
 		try(err)
+		t.Log(diff)
 		try(centrality.Free())
 
 		centrality, _, err = G.PageRank(0.85, 1e-4, 100)
 		try(err)
-		diff, err := prDifference(centrality, ldbcDirectedExampleRank)
+		diff, err = prDifference(centrality, ldbcDirectedExampleRank)
 		try(err)
 		_, err = GrB.VectorReduce(GrB.PlusMonoid[float32](), centrality, nil)
 		try(err)

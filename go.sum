@@ -1,6 +1,8 @@
 github.com/intel/forGoParallel v0.0.0-20230817114341-0dbce1d46778 h1:skyPDAskuJFIJVpT0aFqkrBiGtt0zHf/Gp4KV3hMZbk=
 github.com/intel/forGoParallel v0.0.0-20230817114341-0dbce1d46778/go.mod h1:ub40Ofb53J0B7E2MJXfXN+Yfm3/vfj5+nfaCKxluMNw=
-github.com/intel/forGraphBLASGo v0.0.0-20230914085550-9efee4702595 h1:rLFEKT6d5C2ENzb7h/Gmj4enJLjkELiNSDqeSBmXz9c=
-github.com/intel/forGraphBLASGo v0.0.0-20230914085550-9efee4702595/go.mod h1:YbbAIo6rfYDgAbYJXkrO0NB5+Sf4ofkYWvgdNs4yCDA=
+github.com/intel/forGoParallel v0.0.0-20250212141816-64a59f37520b h1:0/cedgLFop7vn1MHhA5o+b98QK7OhZVqUQMJ60U/CoI=
+github.com/intel/forGoParallel v0.0.0-20250212141816-64a59f37520b/go.mod h1:rI0zq1LMRc34f+s9wvN9781TsnU5atogKWoEW3did0E=
 github.com/intel/forGraphBLASGo v0.0.0-20230915115955-5dbd018b8163 h1:IhXAKbm1HB8BNc+A3Pmh+E+Bs6ljkXvzItWBKSKAhwE=
 github.com/intel/forGraphBLASGo v0.0.0-20230915115955-5dbd018b8163/go.mod h1:YbbAIo6rfYDgAbYJXkrO0NB5+Sf4ofkYWvgdNs4yCDA=
+github.com/intel/forGraphBLASGo v0.0.0-20250212142757-b2fe50994612 h1:C8JL0ivWr2DH/ue9lAKypGvqDIgVUAeX/CfXVitnm6k=
+github.com/intel/forGraphBLASGo v0.0.0-20250212142757-b2fe50994612/go.mod h1:xT+44ENL91ICO41XADJU1HjGDDhe7Fm+i7HNhTYCkmI=
